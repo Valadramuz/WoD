@@ -2,12 +2,12 @@
   "name": "WoD — Word of the Day",
   "short_name": "WoD",
   "description": "A beautiful word of the day app to expand your vocabulary",
-  "start_url": "/index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#FFFDF5",
   "theme_color": "#FFFDF5",
   "orientation": "portrait",
-  "scope": "/",
+  "scope": "./",
   "icons": [
     { "src": "icons/icon-72x72.png", "sizes": "72x72", "type": "image/png", "purpose": "any maskable" },
     { "src": "icons/icon-96x96.png", "sizes": "96x96", "type": "image/png", "purpose": "any maskable" },
@@ -26,7 +26,7 @@
       "name": "Today's Word",
       "short_name": "Today",
       "description": "See today's word of the day",
-      "url": "/index.html",
+      "url": "./index.html",
       "icons": [{ "src": "icons/icon-192x192.png", "sizes": "192x192" }]
     }
   ]
