@@ -1,6 +1,6 @@
 {
-  "name": "Scholarly — Word of the Day",
-  "short_name": "Scholarly",
+  "name": "WoD — Word of the Day",
+  "short_name": "WoD",
   "description": "A beautiful word of the day app to expand your vocabulary",
   "start_url": "/index.html",
   "display": "standalone",

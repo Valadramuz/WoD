@@ -6,13 +6,13 @@
 <meta name="theme-color" content="#FFFDF5"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
-<meta name="apple-mobile-web-app-title" content="Scholarly"/>
+<meta name="apple-mobile-web-app-title" content="WoD"/>
 <meta name="description" content="A beautiful word of the day app to expand your vocabulary"/>
 <link rel="manifest" href="manifest.json"/>
 <link rel="apple-touch-icon" href="icons/icon-192x192.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,700;1,6..72,300;1,6..72,400;1,6..72,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<title>Scholarly — Word of the Day</title>
+<title>WoD — Word of the Day</title>
 <style>
   :root {
     --bg: #FFFDF5;
@@ -274,7 +274,7 @@
 <header class="header">
   <div class="header-brand" onclick="scrollToTop()">
     <span class="material-symbols-outlined" style="font-size:19px">menu_book</span>
-    <h1>Scholarly</h1>
+    <h1>WoD</h1>
   </div>
 </header>
 
@@ -357,9 +357,9 @@ let state = {
   currentIndex: -1, // -1 = today
   showDetails: false,
   speaking: false,
-  favorites: JSON.parse(localStorage.getItem('scholarly_favorites') || '[]'),
-  wordsViewed: JSON.parse(localStorage.getItem('scholarly_viewed') || '[]'),
-  streak: JSON.parse(localStorage.getItem('scholarly_streak') || '[]'),
+  favorites: JSON.parse(localStorage.getItem('wod_favorites') || '[]'),
+  wordsViewed: JSON.parse(localStorage.getItem('wod_viewed') || '[]'),
+  streak: JSON.parse(localStorage.getItem('wod_streak') || '[]'),
 };
 
 function getTodayStr() {
@@ -386,13 +386,13 @@ function trackVisit() {
   const today = getTodayStr();
   if (!state.wordsViewed.includes(today)) {
     state.wordsViewed.push(today);
-    localStorage.setItem('scholarly_viewed', JSON.stringify(state.wordsViewed));
+    localStorage.setItem('wod_viewed', JSON.stringify(state.wordsViewed));
   }
   // Streak
   if (!state.streak.includes(today)) {
     state.streak.push(today);
     if (state.streak.length > 7) state.streak = state.streak.slice(-7);
-    localStorage.setItem('scholarly_streak', JSON.stringify(state.streak));
+    localStorage.setItem('wod_streak', JSON.stringify(state.streak));
   }
 }
 trackVisit();
@@ -533,7 +533,7 @@ function toggleFav() {
   const i = state.favorites.indexOf(w);
   if (i > -1) { state.favorites.splice(i,1); showToast('Removed from favorites'); }
   else { state.favorites.push(w); showToast('Saved to favorites'); }
-  localStorage.setItem('scholarly_favorites', JSON.stringify(state.favorites));
+  localStorage.setItem('wod_favorites', JSON.stringify(state.favorites));
   render(false);
 }
 
@@ -575,7 +575,7 @@ window.addEventListener('beforeinstallprompt', e => {
   document.getElementById('install-container').innerHTML = `
     <div class="install-banner" onclick="installApp()">
       <span class="material-symbols-outlined">download</span>
-      Install Scholarly
+      Install WoD
       <button class="install-dismiss" onclick="event.stopPropagation();document.getElementById('install-container').innerHTML=''">&times;</button>
     </div>
   `;
