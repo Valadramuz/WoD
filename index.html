@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#FFFDF5"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="Scholarly"/>
+<meta name="description" content="A beautiful word of the day app to expand your vocabulary"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icons/icon-192x192.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,700;1,6..72,300;1,6..72,400;1,6..72,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<title>Scholarly — Word of the Day</title>
+<style>
+  :root {
+    --bg: #FFFDF5;
+    --fg: #000000;
+    --fg-50: rgba(0,0,0,0.5);
+    --fg-35: rgba(0,0,0,0.35);
+    --fg-20: rgba(0,0,0,0.2);
+    --fg-10: rgba(0,0,0,0.1);
+    --fg-08: rgba(0,0,0,0.08);
+    --fg-05: rgba(0,0,0,0.05);
+    --radius: 9999px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  ::selection { background: #000; color: var(--bg); }
+  .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  }
+
+  /* Animations */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-14px); } }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+  @keyframes slideDown { from { opacity: 0; max-height: 0; } to { opacity: 1; max-height: 500px; } }
+  @keyframes shimmer { from { background-position: -400px 0; } to { background-position: 400px 0; } }
+  @keyframes widgetIn { from { opacity:0; transform: translateY(12px) scale(0.97); } to { opacity:1; transform: translateY(0) scale(1); } }
+
+  .fade-in { opacity: 0; animation: fadeUp 0.85s cubic-bezier(0.22,1,0.36,1) forwards; }
+  .fade-out { animation: fadeOut 0.3s cubic-bezier(0.22,1,0.36,1) forwards; }
+  .d1 { animation-delay: 0.08s; } .d2 { animation-delay: 0.22s; }
+  .d3 { animation-delay: 0.38s; } .d4 { animation-delay: 0.52s; }
+  .d5 { animation-delay: 0.66s; } .d6 { animation-delay: 0.80s; }
+
+  /* Header */
+  .header {
+    position: fixed; top: 0; width: 100%; display: flex; justify-content: center;
+    align-items: center; padding: 20px 24px; z-index: 50;
+    background: rgba(255,253,245,0.82); backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+  .header-brand { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+  .header-brand h1 {
+    font-family: 'Newsreader', serif; font-size: 17px; font-weight: 700;
+    font-style: italic; letter-spacing: -0.02em;
+  }
+
+  /* Main */
+  .main {
+    min-height: 100vh; min-height: 100dvh;
+    display: flex; flex-direction: column; justify-content: center;
+    align-items: center; padding: 90px 28px 120px; max-width: 780px;
+    margin: 0 auto; text-align: center;
+  }
+
+  /* Typography */
+  .date-label {
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.4em; color: var(--fg-35);
+  }
+  .word {
+    font-family: 'Newsreader', serif; font-weight: 700; font-style: italic;
+    font-size: clamp(52px, 13vw, 120px); line-height: 0.94;
+    letter-spacing: -0.03em; margin: 36px 0 24px;
+  }
+  .phonetic-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 18px; margin-bottom: 40px; flex-wrap: wrap;
+  }
+  .phonetic {
+    font-family: 'Newsreader', serif; font-style: italic;
+    font-size: 17px; color: var(--fg-50);
+  }
+  .divider-line { height: 1px; width: 22px; background: var(--fg-20); }
+  .word-type {
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.2em; color: var(--fg-50);
+  }
+  .definition {
+    font-size: clamp(19px, 3.8vw, 27px); font-weight: 300;
+    line-height: 1.62; max-width: 560px;
+  }
+
+  /* Buttons */
+  .btn-row { margin-top: 42px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .icon-btn {
+    width: 46px; height: 46px; display: flex; align-items: center;
+    justify-content: center; border: 1px solid var(--fg-10);
+    border-radius: var(--radius); background: transparent;
+    cursor: pointer; transition: all 0.28s cubic-bezier(0.22,1,0.36,1);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .icon-btn:hover { background: var(--fg-05); }
+  .icon-btn:active { transform: scale(0.92); }
+  .icon-btn.active { background: var(--fg-05); }
+  .icon-btn .material-symbols-outlined { font-size: 19px; }
+  .speak-pulse { animation: pulse 0.45s ease; }
+
+  /* Nav arrows */
+  .nav-row { margin-top: 48px; display: flex; align-items: center; gap: 28px; }
+  .nav-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 8px; opacity: 0.18;
+    transition: all 0.25s ease;
+  }
+  .nav-btn:hover { opacity: 0.55; transform: scale(1.1); }
+  .nav-btn .material-symbols-outlined { font-size: 19px; }
+  .nav-label {
+    font-size: 9px; text-transform: uppercase;
+    letter-spacing: 0.3em; color: var(--fg-20);
+  }
+
+  /* Details panel */
+  .details {
+    margin-top: 44px; max-width: 500px; width: 100%; text-align: left;
+    overflow: hidden; animation: slideDown 0.55s cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+  .detail-block { margin-bottom: 26px; opacity: 0; animation: fadeUp 0.55s cubic-bezier(0.22,1,0.36,1) forwards; }
+  .detail-block:nth-child(2) { animation-delay: 0.06s; }
+  .detail-block:nth-child(3) { animation-delay: 0.14s; }
+  .detail-block:nth-child(4) { animation-delay: 0.22s; }
+  .detail-label {
+    font-size: 9px; text-transform: uppercase;
+    letter-spacing: 0.35em; color: rgba(0,0,0,0.28);
+    display: block; margin-bottom: 7px;
+  }
+  .detail-origin {
+    font-family: 'Newsreader', serif; font-style: italic;
+    font-size: 15px; line-height: 1.6; color: rgba(0,0,0,0.65);
+  }
+  .detail-example {
+    font-size: 14px; font-weight: 300; line-height: 1.72;
+    color: rgba(0,0,0,0.55); border-left: 2px solid var(--fg-08);
+    padding-left: 15px;
+  }
+  .hr { height: 1px; background: var(--fg-08); margin: 8px 0 26px; }
+
+  /* Widget Section */
+  .widgets-section {
+    width: 100%; max-width: 780px; margin: 0 auto;
+    padding: 0 28px 80px;
+  }
+  .widget-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 520px) { .widget-grid { grid-template-columns: 1fr; } }
+
+  .widget {
+    background: #fff; border: 1px solid var(--fg-08);
+    border-radius: 16px; padding: 22px;
+    animation: widgetIn 0.6s cubic-bezier(0.22,1,0.36,1) forwards;
+    opacity: 0; transition: box-shadow 0.3s ease;
+  }
+  .widget:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.05); }
+  .widget:nth-child(1) { animation-delay: 0.1s; }
+  .widget:nth-child(2) { animation-delay: 0.18s; }
+  .widget:nth-child(3) { animation-delay: 0.26s; }
+  .widget:nth-child(4) { animation-delay: 0.34s; }
+
+  .widget-header {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 14px;
+  }
+  .widget-header .material-symbols-outlined { font-size: 18px; color: var(--fg-35); }
+  .widget-title {
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.25em; color: var(--fg-35); font-weight: 500;
+  }
+  .widget-word {
+    font-family: 'Newsreader', serif; font-style: italic;
+    font-weight: 700; font-size: 22px; margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .widget-def {
+    font-size: 13px; font-weight: 300; line-height: 1.55;
+    color: var(--fg-50);
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .widget-stat { font-family: 'Newsreader', serif; font-size: 36px; font-weight: 700; letter-spacing: -0.02em; }
+  .widget-stat-label { font-size: 11px; color: var(--fg-35); margin-top: 4px; }
+
+  .streak-bar { display: flex; gap: 5px; margin-top: 12px; }
+  .streak-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 500; color: var(--fg-35);
+    border: 1px solid var(--fg-10); transition: all 0.3s;
+  }
+  .streak-dot.active { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .streak-dot.today { border: 1.5px solid var(--fg); font-weight: 600; }
+
+  /* Favorites list in widget */
+  .fav-list { display: flex; flex-direction: column; gap: 8px; }
+  .fav-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 0; border-bottom: 1px solid var(--fg-08);
+  }
+  .fav-item:last-child { border: none; }
+  .fav-item-word {
+    font-family: 'Newsreader', serif; font-style: italic;
+    font-size: 15px; font-weight: 600;
+  }
+  .fav-item-type { font-size: 10px; color: var(--fg-35); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+    background: var(--fg); color: var(--bg); padding: 12px 24px;
+    border-radius: 40px; font-size: 13px; font-weight: 400;
+    z-index: 100; animation: fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) forwards;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  }
+
+  /* Footer */
+  .footer-ornament {
+    position: fixed; bottom: 36px; width: 100%;
+    display: flex; justify-content: center;
+    opacity: 0.12; pointer-events: none;
+  }
+  .footer-line { height: 1px; width: 44px; background: var(--fg); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-thumb { background: var(--fg-20); border-radius: 4px; }
+
+  /* Install banner */
+  .install-banner {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--fg); color: var(--bg); padding: 14px 28px;
+    border-radius: 40px; font-size: 13px; display: flex;
+    align-items: center; gap: 12px; z-index: 60;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2); cursor: pointer;
+    animation: fadeUp 0.5s 1s cubic-bezier(0.22,1,0.36,1) forwards;
+    opacity: 0;
+  }
+  .install-banner:hover { background: #222; }
+  .install-banner .material-symbols-outlined { font-size: 18px; }
+  .install-dismiss {
+    background: none; border: none; color: var(--bg);
+    cursor: pointer; opacity: 0.5; margin-left: 4px;
+    font-size: 18px; line-height: 1;
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-brand" onclick="scrollToTop()">
+    <span class="material-symbols-outlined" style="font-size:19px">menu_book</span>
+    <h1>Scholarly</h1>
+  </div>
+</header>
+
+<main class="main" id="main">
+  <div id="content"></div>
+</main>
+
+<section class="widgets-section" id="widgets-section"></section>
+
+<footer class="footer-ornament">
+  <div class="footer-line"></div>
+</footer>
+
+<div id="toast-container"></div>
+<div id="install-container"></div>
+
+<script>
+// ── Word Data ──────────────────────────────────────────────
+const WORDS = [
+  { word:"Petrichor", phonetic:"/ˈpeˌtrīkôr/", type:"noun",
+    definition:"A pleasant smell that frequently accompanies the first rain after a long period of warm, dry weather.",
+    origin:"From Greek petra (stone) + ichor (the fluid that flows in the veins of the gods).",
+    example:"After weeks of relentless summer heat, she stepped outside and inhaled the petrichor rising from the garden path." },
+  { word:"Sonder", phonetic:"/ˈsändər/", type:"noun",
+    definition:"The realization that each passerby has a life as vivid and complex as your own.",
+    origin:"Coined by John Koenig in The Dictionary of Obscure Sorrows.",
+    example:"Standing in the crowded terminal, he was struck by a profound sonder, imagining each traveler's hidden universe." },
+  { word:"Vellichor", phonetic:"/ˈvelɪkɔːr/", type:"noun",
+    definition:"The strange wistfulness of used bookshops, which are somehow infused with the passage of time.",
+    origin:"A neologism blending vellum and ichor, evoking the enchantment of old pages.",
+    example:"She wandered the aisles, lost in vellichor, running her fingers along cracked leather spines." },
+  { word:"Hiraeth", phonetic:"/ˈhɪəraɪ̯θ/", type:"noun",
+    definition:"A deep longing for a home you cannot return to, or one that never was.",
+    origin:"Welsh, with no direct English translation; one of the defining words of Welsh culture.",
+    example:"The old melody filled him with hiraeth for a place he had only visited in dreams." },
+  { word:"Ephemeral", phonetic:"/əˈfem(ə)rəl/", type:"adjective",
+    definition:"Lasting for a very short time; transient, fleeting.",
+    origin:"From Greek ephemeros — lasting only a day.",
+    example:"The cherry blossoms, beautiful and ephemeral, reminded her to savor each passing moment." },
+  { word:"Susurrus", phonetic:"/so͞oˈsərəs/", type:"noun",
+    definition:"A whispering or rustling sound.",
+    origin:"Latin, imitative of the sound itself — an onomatopoeia frozen in time.",
+    example:"The susurrus of wind through the wheat field was the only sound for miles." },
+  { word:"Limerence", phonetic:"/ˈlɪmɪrəns/", type:"noun",
+    definition:"The state of being infatuated with another person, characterized by intrusive thinking and longing for reciprocation.",
+    origin:"Coined by psychologist Dorothy Tennov in 1979.",
+    example:"What he mistook for love was merely limerence — an obsessive, consuming reverie." },
+  { word:"Saudade", phonetic:"/saʊˈdɑːdə/", type:"noun",
+    definition:"A melancholic longing or nostalgia for something or someone loved and then lost.",
+    origin:"Portuguese, often described as untranslatable — a cornerstone of Lusophone identity.",
+    example:"Listening to fado in the dim café, she was engulfed by a saudade she could not name." },
+  { word:"Komorebi", phonetic:"/kɔːmɔːɾebɪ/", type:"noun",
+    definition:"Sunlight filtering through the leaves of trees.",
+    origin:"Japanese (木漏れ日), a compound of tree, leak, and sun.",
+    example:"They lay on the forest floor, faces dappled by komorebi shifting in the afternoon breeze." },
+  { word:"Numinous", phonetic:"/ˈn(j)uːmɪnəs/", type:"adjective",
+    definition:"Having a strong religious or spiritual quality; indicating the presence of a divinity.",
+    origin:"From Latin numen — divine will or nod of a god.",
+    example:"The cathedral's silence was numinous, as though the air itself held its breath." },
+  { word:"Querencia", phonetic:"/keˈɾenθja/", type:"noun",
+    definition:"A place from which one's strength is drawn; where one feels most at home.",
+    origin:"Spanish, from querer (to want or love) — used in bullfighting for the spot the bull returns to.",
+    example:"The old kitchen with its worn tile floor had always been her querencia." },
+  { word:"Phosphene", phonetic:"/ˈfɒsfiːn/", type:"noun",
+    definition:"The light and colours produced by rubbing or pressing on closed eyes.",
+    origin:"From Greek phos (light) + phainein (to show).",
+    example:"As a child, he would press his palms to his eyelids just to watch the phosphenes bloom." },
+  { word:"Fernweh", phonetic:"/ˈfɛʁnveː/", type:"noun",
+    definition:"An ache for distant places; the craving for travel.",
+    origin:"German, literally 'far-pain' — the opposite of homesickness.",
+    example:"She stared at the map pinned to her wall, consumed by fernweh for coasts she'd never seen." },
+  { word:"Apricity", phonetic:"/əˈprɪsɪti/", type:"noun",
+    definition:"The warmth of the sun in winter.",
+    origin:"From Latin apricitas, derived from apricus (warmed by the sun).",
+    example:"He sat on the bench in his overcoat, grateful for the quiet apricity of the December morning." },
+];
+
+// ── State ──────────────────────────────────────────────────
+let state = {
+  currentIndex: -1, // -1 = today
+  showDetails: false,
+  speaking: false,
+  favorites: JSON.parse(localStorage.getItem('scholarly_favorites') || '[]'),
+  wordsViewed: JSON.parse(localStorage.getItem('scholarly_viewed') || '[]'),
+  streak: JSON.parse(localStorage.getItem('scholarly_streak') || '[]'),
+};
+
+function getTodayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+
+function getDayIndex() {
+  const d = new Date();
+  return (d.getFullYear()*366 + d.getMonth()*31 + d.getDate()) % WORDS.length;
+}
+
+function getCurrentWord() {
+  if (state.currentIndex === -1) return WORDS[getDayIndex()];
+  return WORDS[state.currentIndex];
+}
+
+function formatDate() {
+  return new Date().toLocaleDateString('en-US', { month:'short', day:'numeric' });
+}
+
+// Track today's visit
+function trackVisit() {
+  const today = getTodayStr();
+  if (!state.wordsViewed.includes(today)) {
+    state.wordsViewed.push(today);
+    localStorage.setItem('scholarly_viewed', JSON.stringify(state.wordsViewed));
+  }
+  // Streak
+  if (!state.streak.includes(today)) {
+    state.streak.push(today);
+    if (state.streak.length > 7) state.streak = state.streak.slice(-7);
+    localStorage.setItem('scholarly_streak', JSON.stringify(state.streak));
+  }
+}
+trackVisit();
+
+// ── Render ─────────────────────────────────────────────────
+function render(animate = true) {
+  const w = getCurrentWord();
+  const isToday = state.currentIndex === -1;
+  const isFav = state.favorites.includes(w.word);
+  const cls = animate ? 'fade-in' : '';
+
+  document.getElementById('content').innerHTML = `
+    <div class="${cls} d1"><span class="date-label">${isToday ? 'Today — '+formatDate() : 'Archive'}</span></div>
+    <div class="${cls} d2"><h2 class="word">${w.word}</h2></div>
+    <div class="phonetic-row ${cls} d3">
+      <span class="phonetic">${w.phonetic}</span>
+      <span class="divider-line"></span>
+      <span class="word-type">${w.type}</span>
+    </div>
+    <div class="${cls} d4"><p class="definition">${w.definition}</p></div>
+    <div class="btn-row ${cls} d5">
+      <button class="icon-btn" onclick="speak()" id="speakBtn" title="Pronounce">
+        <span class="material-symbols-outlined">volume_up</span>
+      </button>
+      <button class="icon-btn ${state.showDetails ? 'active' : ''}" onclick="toggleDetails()" title="Details">
+        <span class="material-symbols-outlined">${state.showDetails ? 'expand_less' : 'expand_more'}</span>
+      </button>
+      <button class="icon-btn ${isFav ? 'active' : ''}" onclick="toggleFav()" title="Favorite">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' ${isFav?1:0},'wght' 300">favorite</span>
+      </button>
+      <button class="icon-btn" onclick="copyWord()" id="copyBtn" title="Copy">
+        <span class="material-symbols-outlined">content_copy</span>
+      </button>
+    </div>
+    ${state.showDetails ? renderDetails(w) : ''}
+    <div class="nav-row ${cls} d6">
+      <button class="nav-btn" onclick="navWord('prev')" title="Previous"><span class="material-symbols-outlined">arrow_back</span></button>
+      <span class="nav-label">Explore</span>
+      <button class="nav-btn" onclick="navWord('next')" title="Next"><span class="material-symbols-outlined">arrow_forward</span></button>
+    </div>
+  `;
+
+  renderWidgets();
+}
+
+function renderDetails(w) {
+  return `
+    <div class="details">
+      <div class="detail-block"><div class="hr"></div></div>
+      <div class="detail-block">
+        <span class="detail-label">Origin</span>
+        <p class="detail-origin">${w.origin}</p>
+      </div>
+      <div class="detail-block">
+        <span class="detail-label">Example</span>
+        <p class="detail-example">"${w.example}"</p>
+      </div>
+      <div class="detail-block"><div class="hr"></div></div>
+    </div>
+  `;
+}
+
+function renderWidgets() {
+  const days = ['S','M','T','W','T','F','S'];
+  const today = new Date().getDay();
+  const todayStr = getTodayStr();
+
+  let streakDots = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - (today - i));
+    const dStr = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+    const active = state.streak.includes(dStr);
+    const isTodayDot = dStr === todayStr;
+    streakDots += `<div class="streak-dot ${active?'active':''} ${isTodayDot?'today':''}">${days[i]}</div>`;
+  }
+
+  const favList = state.favorites.slice(-3).reverse().map(name => {
+    const w = WORDS.find(x => x.word === name);
+    return w ? `<div class="fav-item"><span class="fav-item-word">${w.word}</span><span class="fav-item-type">${w.type}</span></div>` : '';
+  }).join('');
+
+  // Tomorrow's word teaser
+  const tmrwIndex = (getDayIndex() + 1) % WORDS.length;
+  const tmrw = WORDS[tmrwIndex];
+
+  document.getElementById('widgets-section').innerHTML = `
+    <div class="widget-grid">
+      <div class="widget">
+        <div class="widget-header">
+          <span class="material-symbols-outlined">local_fire_department</span>
+          <span class="widget-title">Streak</span>
+        </div>
+        <div class="widget-stat">${state.wordsViewed.length}</div>
+        <div class="widget-stat-label">words explored</div>
+        <div class="streak-bar">${streakDots}</div>
+      </div>
+      <div class="widget">
+        <div class="widget-header">
+          <span class="material-symbols-outlined">schedule</span>
+          <span class="widget-title">Tomorrow</span>
+        </div>
+        <div class="widget-word">${tmrw.word}</div>
+        <div class="widget-def">${tmrw.definition}</div>
+      </div>
+      <div class="widget" style="grid-column: span 2">
+        <div class="widget-header">
+          <span class="material-symbols-outlined">favorite</span>
+          <span class="widget-title">Favorites${state.favorites.length ? ' ('+state.favorites.length+')' : ''}</span>
+        </div>
+        ${state.favorites.length ? '<div class="fav-list">'+favList+'</div>' : '<div style="color:var(--fg-35);font-size:13px;font-weight:300">Tap the heart to save words you love.</div>'}
+      </div>
+    </div>
+  `;
+}
+
+// ── Actions ────────────────────────────────────────────────
+function speak() {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(getCurrentWord().word);
+    u.rate = 0.78;
+    const btn = document.getElementById('speakBtn');
+    btn.classList.add('speak-pulse');
+    btn.querySelector('.material-symbols-outlined').textContent = 'graphic_eq';
+    u.onend = () => { btn.classList.remove('speak-pulse'); btn.querySelector('.material-symbols-outlined').textContent = 'volume_up'; };
+    window.speechSynthesis.speak(u);
+  }
+}
+
+function toggleDetails() {
+  state.showDetails = !state.showDetails;
+  render(false);
+}
+
+function toggleFav() {
+  const w = getCurrentWord().word;
+  const i = state.favorites.indexOf(w);
+  if (i > -1) { state.favorites.splice(i,1); showToast('Removed from favorites'); }
+  else { state.favorites.push(w); showToast('Saved to favorites'); }
+  localStorage.setItem('scholarly_favorites', JSON.stringify(state.favorites));
+  render(false);
+}
+
+function copyWord() {
+  const w = getCurrentWord();
+  navigator.clipboard.writeText(`${w.word} — ${w.definition}`);
+  const btn = document.getElementById('copyBtn');
+  btn.querySelector('.material-symbols-outlined').textContent = 'check';
+  showToast('Copied to clipboard');
+  setTimeout(() => { try { btn.querySelector('.material-symbols-outlined').textContent = 'content_copy'; } catch(e){} }, 1800);
+}
+
+function navWord(dir) {
+  const cur = state.currentIndex === -1 ? getDayIndex() : state.currentIndex;
+  state.currentIndex = dir === 'next' ? (cur+1)%WORDS.length : (cur-1+WORDS.length)%WORDS.length;
+  state.showDetails = false;
+  render(true);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function scrollToTop() {
+  state.currentIndex = -1;
+  state.showDetails = false;
+  render(true);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showToast(msg) {
+  const c = document.getElementById('toast-container');
+  c.innerHTML = `<div class="toast">${msg}</div>`;
+  setTimeout(() => c.innerHTML = '', 2200);
+}
+
+// ── PWA Install ────────────────────────────────────────────
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-container').innerHTML = `
+    <div class="install-banner" onclick="installApp()">
+      <span class="material-symbols-outlined">download</span>
+      Install Scholarly
+      <button class="install-dismiss" onclick="event.stopPropagation();document.getElementById('install-container').innerHTML=''">&times;</button>
+    </div>
+  `;
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      document.getElementById('install-container').innerHTML = '';
+    });
+  }
+}
+
+// ── Service Worker ─────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+// ── Keyboard nav ───────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') navWord('next');
+  if (e.key === 'ArrowLeft') navWord('prev');
+  if (e.key === ' ') { e.preventDefault(); toggleDetails(); }
+});
+
+// ── Swipe support ──────────────────────────────────────────
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 60) { dx > 0 ? navWord('prev') : navWord('next'); }
+}, { passive: true });
+
+// ── Init ───────────────────────────────────────────────────
+render(true);
+</script>
+</body>
+</html>
